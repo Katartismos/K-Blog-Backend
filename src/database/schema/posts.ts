@@ -1,12 +1,12 @@
 import { pgTable, text, uuid, timestamp, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { users } from './auth';
+import { user } from './auth';
 
 export const posts = pgTable(
   'posts',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
     slug: text('slug').notNull().unique(),
     title: text('title').notNull(),
     content: text('content').notNull(),
@@ -26,8 +26,8 @@ export const posts = pgTable(
 );
 
 export const postsRelations = relations(posts, ({ one }) => ({
-  author: one(users, {
+  author: one(user, {
     fields: [posts.userId],
-    references: [users.id],
+    references: [user.id],
   }),
 }));

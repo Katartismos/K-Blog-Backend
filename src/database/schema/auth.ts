@@ -2,7 +2,7 @@ import { pgTable, text, boolean, timestamp } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { posts } from './posts';
 
-export const users = pgTable('users', {
+export const user = pgTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
@@ -12,11 +12,11 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const sessions = pgTable('sessions', {
+export const session = pgTable('session', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
+    .references(() => user.id, { onDelete: 'cascade' }),
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   ipAddress: text('ip_address'),
@@ -25,11 +25,11 @@ export const sessions = pgTable('sessions', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const accounts = pgTable('accounts', {
+export const account = pgTable('account', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
+    .references(() => user.id, { onDelete: 'cascade' }),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
   accessToken: text('access_token'),
@@ -43,7 +43,7 @@ export const accounts = pgTable('accounts', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const verifications = pgTable('verifications', {
+export const verification = pgTable('verification', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
@@ -52,6 +52,6 @@ export const verifications = pgTable('verifications', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(user, ({ many }) => ({
   posts: many(posts),
 }));
