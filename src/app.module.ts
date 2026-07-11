@@ -7,7 +7,7 @@ import { PostsModule } from './posts/posts.module';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [ArcjetModuleAuthModule, PostsModule, DatabaseModule],
+  imports: [ArcjetModule, AuthModule, PostsModule, DatabaseModule],
   controllers: [AppController],
   providers: [AppService],
 })
