@@ -4,7 +4,7 @@ import {
   ArcjetModule as NestArcjetModule,
   shield,
   detectBot,
-  tokenBucket,
+  slidingWindow,
 } from '@arcjet/nest';
 import { ArcjetService } from './arcjet.service';
 import { ArcjetController } from './arcjet.controller';
@@ -26,15 +26,13 @@ const arcjetEnv = getRequiredEnv('ARCJET_ENV');
         // Bot detection: Block malicious bots but allow search engines
         detectBot({
           mode: 'LIVE',
-          allow: ['CATEGORY:SEARCH_ENGINE'],
+          allow: ['CATEGORY:SEARCH_ENGINE', 'CATEGORY:PREVIEW'],
         }),
         // Global Rate Limiting policy
-        tokenBucket({
+        slidingWindow({
           mode: 'LIVE',
-          refillRate: 5,
-          interval: 10,
-          capacity: 10,
-          characteristics: ['ip.src'],
+          interval: 30,
+          max: 10,
         }),
       ],
     }),
