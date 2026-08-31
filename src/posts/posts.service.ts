@@ -221,7 +221,7 @@ export class PostsService {
       const existingPost = await this.findOne(idOrSlug);
 
       // Ownership authorization check
-      if (userId && existingPost.userId && existingPost.userId !== userId) {
+      if (!userId || existingPost.userId !== userId) {
         throw new ForbiddenException(
           "You are not authorized to update this post",
         );
@@ -322,7 +322,7 @@ export class PostsService {
       const existingPost = await this.findOne(idOrSlug);
 
       // Ownership authorization check
-      if (userId && existingPost.userId && existingPost.userId !== userId) {
+      if (!userId || existingPost.userId !== userId) {
         throw new ForbiddenException(
           "You are not authorized to delete this post",
         );
