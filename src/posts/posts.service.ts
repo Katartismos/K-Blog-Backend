@@ -49,42 +49,57 @@ export class PostsService {
     return `${baseSlug}-${uniqueSuffix}`;
   }
 
-  async create(createPostDto: CreatePostDto, userId?: string) {
+  async uploadPostImage(file: Express.Multer.File): Promise<string> {
+    return this.cloudinaryService.uploadImageBuffer(file, 'blog-posts');
+  }
+
+  async create(
+    createPostDto: CreatePostDto,
+    userId?: string,
+    file?: Express.Multer.File,
+  ) {
     try {
       this.logger.log(`Creating post with title: "${createPostDto.title}"`);
 
-      // 1. Derive category color automatically
+      // 1. Validate image source presence
+      if (!file && !createPostDto.imageUrl) {
+        throw new BadRequestException('An image file or imageUrl must be provided');
+      }
+
+      // 2. Derive category color automatically
       const categoryColor =
         CATEGORY_COLORS[createPostDto.category] ?? 'bg-gray-600';
 
-      // 2. Generate unique slug
+      // 3. Generate unique slug
       const slug = await this.generateUniqueSlug(
         createPostDto.title,
         createPostDto.slug,
       );
 
-      // 3. Extract plain text for excerpt & readTime fallback
-      const plainText = createPostDto.content.replace(/<[^>]+>/g, ' ').trim();
+      // 4. Extract plain text for excerpt & readTime fallback
+      const plainText = (createPostDto.content || '')
+        .replace(/<[^>]+>/g, ' ')
+        .trim();
       const words = plainText.split(/\s+/).filter(Boolean).length;
 
-      // 4. Derive excerpt
+      // 5. Derive excerpt
       const excerpt =
         createPostDto.excerpt ||
         (plainText.length > 160
           ? `${plainText.substring(0, 157)}...`
           : plainText || createPostDto.title);
 
-      // 5. Derive read time
+      // 6. Derive read time
       const readTime =
         createPostDto.readTime ||
         `${Math.max(1, Math.ceil(words / 200))}-min read`;
 
-      // 6. Upload & optimize image via Cloudinary
-      const optimizedImageUrl = await this.cloudinaryService.uploadImage(
-        createPostDto.imageUrl,
-      );
+      // 7. Upload & optimize image (buffer if file uploaded, else URL/base64)
+      const optimizedImageUrl = file
+        ? await this.cloudinaryService.uploadImageBuffer(file, 'blog-posts')
+        : await this.cloudinaryService.uploadImage(createPostDto.imageUrl!);
 
-      // 7. Persist post into database
+      // 8. Persist post into database
       const [newPost] = await this.db
         .insert(posts)
         .values({
@@ -152,4 +167,3 @@ export class PostsService {
     return `This action removes a #${id} post`;
   }
 }
-

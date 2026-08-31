@@ -22,7 +22,7 @@ export class CreatePostDto {
   title: string;
   content: string;
   category: PostCategory;
-  imageUrl: string;
+  imageUrl?: string;
   excerpt?: string;
   readTime?: string;
   slug?: string;

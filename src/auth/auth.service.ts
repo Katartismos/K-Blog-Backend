@@ -1,5 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { betterAuth } from "better-auth";
+import { bearer } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { DATABASE_CONNECTION } from "../database/database.provider";
 import type { Database } from "../database/database.provider";
@@ -17,6 +18,7 @@ export class AuthService {
       }),
       baseURL: process.env.BETTER_AUTH_URL!,
       secret: process.env.BETTER_AUTH_SECRET!,
+      plugins: [bearer()],
       emailAndPassword: {
         enabled: true,
       },
