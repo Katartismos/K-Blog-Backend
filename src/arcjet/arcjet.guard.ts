@@ -9,6 +9,15 @@ export class ArcjetGuard implements CanActivate {
     const http = context.switchToHttp();
     const req = http.getRequest();
 
+    // Fallback to ensure IP is always defined (e.g. for Render internal health-checks or proxy probes)
+    if (!req.ip) {
+      const forwarded = req.headers['x-forwarded-for'];
+      req.ip =
+        (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : undefined) ||
+        req.socket?.remoteAddress ||
+        '127.0.0.1';
+    }
+
     const decision = await this.arcjetService.protect(req);
 
     if (decision.isDenied()) {
