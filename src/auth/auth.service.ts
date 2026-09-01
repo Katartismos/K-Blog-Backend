@@ -11,6 +11,17 @@ export class AuthService {
   public auth;
 
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {
+    const trustedOrigins = Array.from(
+      new Set([
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "https://k-blog-app.vercel.app",
+        ...(process.env.FRONTEND_URL
+          ? process.env.FRONTEND_URL.split(",").map((s) => s.trim().replace(/\/$/, ""))
+          : []),
+      ]),
+    );
+
     this.auth = betterAuth({
       database: drizzleAdapter(this.db, {
         provider: "pg",
@@ -18,10 +29,7 @@ export class AuthService {
       }),
       baseURL: process.env.BETTER_AUTH_URL!,
       secret: process.env.BETTER_AUTH_SECRET!,
-      trustedOrigins: [
-        process.env.FRONTEND_URL ?? "http://localhost:3000",
-        "http://localhost:5000",
-      ],
+      trustedOrigins,
       plugins: [bearer()],
       emailAndPassword: {
         enabled: true,
