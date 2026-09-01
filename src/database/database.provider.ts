@@ -1,12 +1,12 @@
-import { Injectable, OnApplicationShutdown, Logger } from '@nestjs/common';
-import { Pool } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { getRequiredEnv } from '../arcjet/env';
-import * as schema from './schema';
+import { Injectable, OnApplicationShutdown, Logger } from "@nestjs/common";
+import { Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import { getRequiredEnv } from "../arcjet/env";
+import * as schema from "./schema";
 
 export type Database = ReturnType<typeof drizzle<typeof schema>>;
 
-export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
+export const DATABASE_CONNECTION = "DATABASE_CONNECTION";
 
 @Injectable()
 export class DatabaseService implements OnApplicationShutdown {
@@ -15,8 +15,12 @@ export class DatabaseService implements OnApplicationShutdown {
   public readonly db: Database;
 
   constructor() {
-    const connectionString = getRequiredEnv('DATABASE_URL');
-    this.pool = new Pool({ connectionString });
+    const connectionString = getRequiredEnv("DATABASE_URL");
+    this.pool = new Pool({
+      connectionString,
+      // idleTimeoutMillis: 15000,      [Safely closes idle connections after 15 seconds]
+      // connectionTimeoutMillis: 15000
+    });
     this.db = drizzle({ client: this.pool, schema });
   }
 
