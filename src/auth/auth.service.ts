@@ -11,11 +11,19 @@ export class AuthService {
   public auth;
 
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {
+    const baseURL =
+      process.env.BETTER_AUTH_URL ||
+      process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://k-blog-app.vercel.app"
+        : "http://localhost:3000");
+
     const trustedOrigins = Array.from(
       new Set([
         "http://localhost:3000",
         "http://localhost:5000",
         "https://k-blog-app.vercel.app",
+        baseURL.replace(/\/$/, ""),
         ...(process.env.FRONTEND_URL
           ? process.env.FRONTEND_URL.split(",").map((s) => s.trim().replace(/\/$/, ""))
           : []),
@@ -27,7 +35,7 @@ export class AuthService {
         provider: "pg",
         schema: schema,
       }),
-      baseURL: process.env.BETTER_AUTH_URL!,
+      baseURL,
       secret: process.env.BETTER_AUTH_SECRET!,
       trustedOrigins,
       plugins: [bearer()],
