@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ARCJET } from '@arcjet/nest';
 import type { ArcjetNest } from '@arcjet/nest';
+import { ARCJET } from './arcjet.constants';
+
 
 @Injectable()
 export class ArcjetService {

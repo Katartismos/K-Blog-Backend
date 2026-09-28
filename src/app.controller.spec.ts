@@ -15,8 +15,9 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return "Welcome to K-Blog API!"', () => {
+      expect(appController.getHello()).toBe('Welcome to K-Blog API!');
     });
+
   });
 });
