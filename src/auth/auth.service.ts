@@ -1,16 +1,22 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { betterAuth } from "better-auth";
-import { bearer } from "better-auth/plugins";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { DATABASE_CONNECTION } from "../database/database.provider";
 import type { Database } from "../database/database.provider";
 import * as schema from "../database/schema";
+import type { Request, Response } from "express";
 
-@Injectable()
-export class AuthService {
-  public auth;
+export const BETTER_AUTH = Symbol("BETTER_AUTH");
 
-  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {
+export const authInstanceProvider = {
+  provide: BETTER_AUTH,
+  inject: [DATABASE_CONNECTION],
+  useFactory: async (db: Database) => {
+    // Dynamic ESM imports prevent require() errors in CommonJS on Vercel
+    const [{ betterAuth }, { bearer }, { drizzleAdapter }] = await Promise.all([
+      import("better-auth"),
+      import("better-auth/plugins"),
+      import("better-auth/adapters/drizzle"),
+    ]);
+
     const baseURL =
       process.env.BETTER_AUTH_URL ||
       process.env.FRONTEND_URL ||
@@ -30,8 +36,8 @@ export class AuthService {
       ]),
     );
 
-    this.auth = betterAuth({
-      database: drizzleAdapter(this.db, {
+    return betterAuth({
+      database: drizzleAdapter(db, {
         provider: "pg",
         schema: schema,
       }),
@@ -58,5 +64,16 @@ export class AuthService {
         },
       },
     });
+  },
+};
+
+@Injectable()
+export class AuthService {
+  constructor(@Inject(BETTER_AUTH) public readonly auth: any) {}
+
+  async handleAuth(req: Request, res: Response) {
+    const { toNodeHandler } = await import("better-auth/node");
+    return toNodeHandler(this.auth)(req, res);
   }
 }
+
