@@ -18,10 +18,11 @@ export class DatabaseService implements OnApplicationShutdown {
     const connectionString = getRequiredEnv("DATABASE_URL");
     this.pool = new Pool({
       connectionString,
-      // idleTimeoutMillis: 15000,      [Safely closes idle connections after 15 seconds]
-      // connectionTimeoutMillis: 15000
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 10000,
     });
     this.db = drizzle({ client: this.pool, schema });
+
   }
 
   async onApplicationShutdown() {
