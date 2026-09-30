@@ -67,6 +67,10 @@ export class PostsService {
     return this.cloudinaryService.uploadImageBuffer(file, "blog-posts");
   }
 
+  getCloudinarySignature() {
+    return this.cloudinaryService.generateUploadSignature("blog-posts");
+  }
+
   async create(
     createPostDto: CreatePostDto,
     userId?: string,

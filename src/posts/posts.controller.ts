@@ -23,6 +23,12 @@ import { ImageValidationPipe } from "../cloudinary/pipes/image-validation.pipe";
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @Get("cloudinary-signature")
+  @UseGuards(AuthGuard)
+  getCloudinarySignature() {
+    return this.postsService.getCloudinarySignature();
+  }
+
   @Post("upload-image")
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor("image"))

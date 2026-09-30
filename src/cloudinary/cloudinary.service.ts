@@ -17,6 +17,31 @@ export class CloudinaryService {
   }
 
   /**
+   * Generates cryptographic signature and upload parameters for secure,
+   * direct client-side uploads to Cloudinary.
+   */
+  generateUploadSignature(folder: string = 'blog-posts') {
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const paramsToSign = {
+      folder,
+      timestamp,
+    };
+
+    const signature = cloudinary.utils.api_sign_request(
+      paramsToSign,
+      process.env.CLOUDINARY_API_SECRET!,
+    );
+
+    return {
+      signature,
+      timestamp,
+      apiKey: process.env.CLOUDINARY_API_KEY,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      folder,
+    };
+  }
+
+  /**
    * Upload an in-memory image buffer (Multer file) to Cloudinary via stream.
    * Handles JPG, JPEG, PNG, WEBP with auto-quality/auto-format transformations,
    * and preserves vector paths for SVG.
@@ -143,7 +168,7 @@ export class CloudinaryService {
    */
   ensureOptimizedCloudinaryUrl(url: string): string {
     if (!url.includes('/upload/')) return url;
-    if (url.includes('/f_auto,q_auto/')) return url;
-    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+    if (url.includes('/f_auto,q_auto')) return url;
+    return url.replace('/upload/', '/upload/f_auto,q_auto,c_limit,w_1920/');
   }
 }
